@@ -1,0 +1,10 @@
+Flask
+Werkzeug
+Jinja2
+MarkupSafe
+itsdangerous
+click
+blinker
+python-dotenv
+watchdog
+pymongo
