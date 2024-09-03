@@ -9,7 +9,7 @@ read -p "  ~~~~>_  Por favor, indique la rama donde se enviara su commit: " comm
 
 # Construir los comandos
 add_files="git add $commit_file"
-add_message="git commit -m '$commit_message'"
+add_message="git commit -m '$commit_message'" 
 send_push="git push -u origin $commit_branch"
 
 # Ejecutar los comandos
