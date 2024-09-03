@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd ..
+cd .. 
 
 # Solicitar los inputs al usuario
 read -p "  ~~~~>_  Por favor, indique los archivos a agregar al commit (. para todos): " commit_file
