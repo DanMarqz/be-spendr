@@ -11,7 +11,7 @@ docker_image=$image_name:$image_tag
 
 # Construir los comandos
 build_command="docker build -t \"$docker_image\" ."
-run_command="docker run -it --rm -p 5000:5000 \"$image_variables\" --name $docker_image $docker_image"
+run_command="docker run -it --rm -p 5000:5000 $image_variables --name $image_name $docker_image"
 
 # Ejecutar los comandos
 echo "~~~~>_  Ejecutando comando de build: "
