@@ -14,10 +14,12 @@ build_command="docker build -t \"$docker_image\" ."
 run_command="docker run -it --rm -p 5000:5000 $image_variables --name $image_name $docker_image"
 
 # Ejecutar los comandos
+echo ""
 echo "~~~~>_  Ejecutando comando de build: "
 echo "$build_command"
 eval $build_command
 
+echo ""
 echo "~~~~>_  Ejecutando comando de run: "
 echo "$run_command"
 eval $run_command
