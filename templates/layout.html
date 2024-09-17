@@ -1,16 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flask User Authentication</title>
-</head>
-<body>
+<!DOCTYPE HTML>
+<title>{% block title %}{% endblock%}  - La Mixi - Todo List</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+<nav>
+  <h1>La Mixi - Todo List</h1>
+  <ul>
+    {% if g.user %}
+      <li><span>User: {{ g.user["username"] }}</span></li>
+      <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    {% else %}
+      <li><a href="{{ url_for('auth.register') }}">Sign up</a></li>
+      <li><a href="{{ url_for('auth.login') }}">Log in</a></li>
+    {% endif %}
+  </ul>
+</nav>
+<section class="content">
   <header>
-    <h1>Flask User Authentication</h1>
+      {% block header%}{% endblock %}
   </header>
-  <section>
-    {% block content %}{% endblock %}
-  </section>
-</body>
-</html>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ mesage }}</div>
+  {% endfor %}
+  {% block content %}{% endblock%}
+</section>

@@ -7,7 +7,7 @@ import controllers.auth as auth
 import controllers.todo as todo
 
 variables.loaded()
-db = db.DatabaseManager("test")
+db = db.DBHandler("test")
 
 def create_app():
     app = Flask(__name__)
@@ -25,8 +25,8 @@ def create_app():
 
     @app.route("/test-db-connection")
     def test_db_connection():
-        print(db.test_connection)
-        return f"<p> {db.test_connection()} </p>"
+        print(db.validate_connection)
+        return f"<p> {db.validate_connection()} </p>"
 
     return app
 

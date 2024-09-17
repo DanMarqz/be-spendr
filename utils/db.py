@@ -1,3 +1,4 @@
+import datetime
 import utils.variables as variables  # Importamos variables de configuración (como la URI y el nombre de la base de datos)
 
 from pymongo.mongo_client import MongoClient  # Para crear un cliente de MongoDB y conectarnos a la base de datos
@@ -7,28 +8,45 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 from bson.objectid import ObjectId
 
 # Definimos una clase que manejará las operaciones con la base de datos
-class DatabaseManager:
+class DBHandler:
     def __init__(self, collection_name):
         self.__client           = MongoClient(variables.DB_URI, server_api=ServerApi('1'))
         self.__db               = self.__client[variables.DB_NAME]
         self.__db_collection    = self.__db[collection_name]
 
+    ########## CONNECTION METHODS ##########
+
     # Método para probar la conexión a la base de datos
-    def test_connection(self):
+    def validate_connection(self) -> str:
         print("Validating connection to database...")
 
         try:
             self.__client.admin.command('ping')
-            return "Pinged your deployment. You successfully connected to MongoDB!"
+            return "You successfully connected to Database!"
         except ConnectionFailure as e:
             return f"{variables.ERROR_MSG} Validate the connection to database, details: {e}"
 
     # Método para cerrar la conexión a la base de datos
-    def close_connection(self):
+    def disconnect(self) -> None:
         return self.__client.close()
 
+    ########## END OF CONNECTION METHODS ##########
+    
+    ########## GENERAL METHODS ##########
+
+    def get_doc_by_id(self, id):
+        doc_by_id = self.__db_collection.find_one({'_id': ObjectId(id)})
+        if doc_by_id:
+            return doc_by_id
+        else:
+            return False
+
+    ########## END OF GENERAL METHODS ##########
+
+    ########## USER METHODS ##########
+
     # Método para verificar si un usuario está registrado en la base de datos
-    def check_user_existence(self, username):
+    def user_exists(self, username) -> bool:
         print(f"Validating if user {username} exists in database.")
 
         try:
@@ -39,7 +57,7 @@ class DatabaseManager:
             return False
 
     # Método para registrar un nuevo usuario en la base de datos
-    def register_user_in_database(self, username, password):
+    def add_user(self, username, password) -> bool:
         print(f"Registering the user {username} in database.")
 
         try:
@@ -67,23 +85,31 @@ class DatabaseManager:
     # Método para obtener un usuario por su uid
     def get_user_by_id(self, id):
         print(f"Obtaining user credentials by id.")
-        
         try:
-            user_by_id = self.__db_collection.find_one({'_id': ObjectId(id)})
-            if user_by_id:
-                return user_by_id
-            else:
-                return False
+            user_by_id = self.get_doc_by_id(id)
+            return user_by_id
         except OperationFailure as e:
             print(f"{variables.ERROR_MSG} Obtaining user credentials for authentication, details: {e}")
             return False
 
+    ########## END OF USER METHODS ##########
+
+    ########## TODO METHODS ##########
+
     # Método para crear un todo a un usuario 
-    def create_todo(self, description, completed, created_by):
+    def add_todo(self, name, description, completed, created_by):
         print(f"Registering a new todo in database.")
 
         try:
-            self.__db_collection.insert_one({'description': description, 'completed': completed, 'created_by': created_by})
+            self.__db_collection.insert_one(
+                {
+                    'name': name, 
+                    'description': description, 
+                    'completed': completed, 
+                    'created_by': created_by,
+                    'created_at': datetime.datetime.now(tz=datetime.timezone.utc),
+                }
+            )
             print("Todo registered in Database")
             return True
         except OperationFailure as e:
@@ -92,15 +118,38 @@ class DatabaseManager:
 
     # Método para obtener los todos de un usuario por su id
     def get_todo_by_user_id(self, id):
-        print(f"Obtaining user todos by id.")
+        user_id = ObjectId(id)
+        print(f"Obtaining user ${user_id} todos by id.")
 
         try:
-            todos_by_id = self.__db_collection.find({'_id': ObjectId(id)})
-            print(f"todos:  {todos_by_id}")
+            todos_by_id = self.__db_collection.find({'created_by': user_id})
+
             if todos_by_id:
-                return todos_by_id
+                return list(todos_by_id)
             else:
                 return False
         except OperationFailure as e:
             print(f"{variables.ERROR_MSG} Obtaining user todos, details: {e}")
             return False
+
+    # Método para obtener un todo por su id
+    def get_todo_by_id(self, id):
+        print(f"Obtaining todo by id.")
+        try:
+            todo_by_id = self.get_doc_by_id(id)
+            print(todo_by_id)
+            return todo_by_id
+        except OperationFailure as e:
+            print(f"{variables.ERROR_MSG} Obtaining todo by id, details: {e}")
+            return False
+ 
+    def update_todo(self, id, name, description, completed):
+        print(f"Updating todo by id.")
+        try:
+            self.__db_collection.update_one({'_id': ObjectId(id)}, {'$set': {'name': name, 'description': description, 'completed': completed}})
+            return True
+        except OperationFailure as e:
+            print(f"{variables.ERROR_MSG} Updating todo by id, details: {e}")
+            return False
+
+    ########## END OF TODO METHODS ##########

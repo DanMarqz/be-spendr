@@ -19,7 +19,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Inicializamos el manejador de la DB para trabajar con la colección 'users'
-db = db.DatabaseManager("users")
+db = db.DBHandler("users")
 
 # Ruta para el registro de usuarios
 @bp.route('/register', methods=['GET', 'POST'])
@@ -28,7 +28,7 @@ def register():
         username = request.form['username'] # Obtenemos el nombre de usuario del formulario
         password = request.form['password'] # Obtenemos la contraseña del formulario
         error = None  # Inicializamos la variable de error
-        is_user_registered = db.check_user_existence(username)
+        is_user_registered = db.user_exists(username)
 
         # Validamos si el nombre de usuario está vacío
         if not username:
@@ -44,7 +44,7 @@ def register():
                 flash('Username already exists. Choose a different one.', 'danger')  # Mostramos un mensaje de error
             else:
                 # Registramos el usuario en la base de datos con la contraseña encriptada
-                db.register_user_in_database(username, generate_password_hash(password))
+                db.add_user(username, generate_password_hash(password))
                 flash('Registration successful. You can now log in.', 'success')  # Mensaje de éxito
 
                 # Redirigimos a la página de inicio de sesión
