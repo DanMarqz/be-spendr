@@ -59,7 +59,7 @@ def update(id):
         if error is not None:
             flash(error)
         else:
-            db.update_todo(id, name, description, completed)
+            db.update_todo(id, name, description, completed, g.user["_id"])
 
         return redirect(url_for('todo.index'))
 
@@ -72,7 +72,8 @@ def update(id):
                     "name": todo["name"],
                     "description": todo["description"],
                     "completed": todo["completed"],
-                    "created_at": todo["created_at"]
+                    "created_at": todo["created_at"],
+                    "id": id
                 }
             )
         else:
@@ -80,5 +81,7 @@ def update(id):
 
 @bp.route('/<id>/delete', methods=['GET', 'POST'])
 @auth.login_required
-def delete():
-    return ''
+def delete(id):
+    if request.method == 'POST':
+        db.delete_todo(id, g.user["_id"])
+        return redirect(url_for('todo.index'))

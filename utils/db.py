@@ -143,13 +143,40 @@ class DBHandler:
             print(f"{variables.ERROR_MSG} Obtaining todo by id, details: {e}")
             return False
  
-    def update_todo(self, id, name, description, completed):
+    def update_todo(self, id, name, description, completed, created_by):
         print(f"Updating todo by id.")
         try:
-            self.__db_collection.update_one({'_id': ObjectId(id)}, {'$set': {'name': name, 'description': description, 'completed': completed}})
+            self.__db_collection.update_one(
+                {
+                    '_id': ObjectId(id),
+                    'created_by': ObjectId(created_by)
+                },
+                {
+                    '$set': {
+                        'name': name, 
+                        'description': description, 
+                        'completed': completed
+                    }
+                }
+            )
             return True
         except OperationFailure as e:
             print(f"{variables.ERROR_MSG} Updating todo by id, details: {e}")
+            return False
+
+    def delete_todo(self, id, created_by):
+        print(f"Deleting todo by id.")
+        try:
+            self.__db_collection.delete_one(
+                {
+                    '_id': ObjectId(id), 
+                    'created_by': ObjectId(created_by)
+                }
+            )
+            print("Todo deleted in Database")
+            return True
+        except OperationFailure as e:
+            print(f"{variables.ERROR_MSG} Deleting todo by id, details: {e}")
             return False
 
     ########## END OF TODO METHODS ##########
