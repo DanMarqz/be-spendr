@@ -9,79 +9,71 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
-import utils.db as db
+from flask import Blueprint, jsonify, g, request, abort, redirect, url_for
+import services.db_handler as db_handler
 import controllers.auth as auth
 
 bp = Blueprint('todo', __name__)
-db = db.DBHandler("todo")
-todos = ''
+db_handler = db_handler.DBHandler("todo")
 
-@bp.route('/')
+@bp.route('/', methods=['GET'])
 @auth.login_required
 def index():
-  todos = db.get_todo_by_user_id(g.user["_id"])
-  return render_template('todo/index.html', todos=todos)
+    todos = db_handler.get_todo_by_user_id(g.user["_id"])
+    return jsonify(todos), 200
 
-@bp.route('/create', methods=['GET', 'POST'])
+@bp.route('/create', methods=['POST'])
 @auth.login_required
 def create():
-  if request.method == 'POST':
-    name = request.form['name']
-    description = request.form['description']
+    name = request.json.get('name')
+    description = request.json.get('description')
     error = None
 
     if not description:
-      error = 'Description required'
+        error = 'Description required'
 
     if error is not None:
-      flash(error)
+        return jsonify({"error": error}), 400
     else:
-        db.add_todo(name, description, False, g.user["_id"])
-        return redirect(url_for('todo.index'))
+        db_handler.add_todo(name, description, False, g.user["_id"])
+        return jsonify({"message": "Todo created successfully"}), 201
 
-  return render_template('todo/create.html')
-
-@bp.route('/<id>/update', methods=['GET', 'POST'])
+@bp.route('/<id>/update', methods=['PUT'])
 @auth.login_required
 def update(id):
+    name = request.json.get('name')
+    description = request.json.get('description')
+    completed = request.json.get('completed', False)
+    error = None
 
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        completed = True if request.form.get('completed') == 'on' else False
-        error = None
+    if not name:
+        error = 'Name is required.'
+    if not description:
+        error = 'Description is required.'
 
-        if not name:
-            error = 'Name is required.'
-        if not description:
-            error = 'Description is required.'
-
-        if error is not None:
-            flash(error)
+    if error is not None:
+        return jsonify({"error": error}), 400
+    else:
+        success = db_handler.update_todo(id, name, description, completed, g.user["_id"])
+        if success:
+            return jsonify({"message": "Todo updated successfully"}), 200
         else:
-            db.update_todo(id, name, description, completed, g.user["_id"])
+            return jsonify({"error": "Todo not found"}), 404
 
-        return redirect(url_for('todo.index'))
+@bp.route('/<id>', methods=['GET'])
+@auth.login_required
+def get_todo_by_id(id):
+    todo = db_handler.get_todo_by_id(id)
+    if todo:
+        return jsonify(todo), 200
+    else:
+        return jsonify({"error": "Todo not found"}), 404
 
-    if request.method == 'GET':
-        todo = db.get_todo_by_id(id)
-        if todo:
-            return render_template(
-                'todo/update.html',
-                todo={
-                    "name": todo["name"],
-                    "description": todo["description"],
-                    "completed": todo["completed"],
-                    "created_at": todo["created_at"],
-                    "id": id
-                }
-            )
-        else:
-            abort(404, description="Todo not found")
-
-@bp.route('/<id>/delete', methods=['GET', 'POST'])
+@bp.route('/<id>/delete', methods=['DELETE'])
 @auth.login_required
 def delete(id):
-    if request.method == 'POST':
-        db.delete_todo(id, g.user["_id"])
-        return redirect(url_for('todo.index'))
+    success = db_handler.delete_todo(id, g.user["_id"])
+    if success:
+        return jsonify({"message": "Todo deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Todo not found"}), 404
