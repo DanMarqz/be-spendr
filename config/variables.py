@@ -9,6 +9,7 @@ TOKEN           = os.getenv('TOKEN')
 DB_URI          = os.getenv('DB_URI')
 DB_NAME         = os.getenv('DB_NAME')
 ERROR_MSG       = os.getenv('ERROR_MSG')
+DEBUG_MODE      = os.getenv('DEBUG_MODE')
 
 def loaded():
     print("Variables loaded...")

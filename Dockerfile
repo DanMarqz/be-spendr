@@ -15,5 +15,5 @@ ARG DB_NAME
 RUN echo $DB_NAME
 
 # Define the command to run the Flask application using Gunicorn
-# CMD ["gunicorn", "application:app", "-b", "0.0.0.0:5000", "-w", "4"]
-CMD ["python", "main.py"]
+CMD ["gunicorn", "main:create_app()", "-b", "0.0.0.0:5001", "-w", "1"]
+# CMD ["python", "main.py"]
