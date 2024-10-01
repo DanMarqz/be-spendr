@@ -17,7 +17,7 @@ db = db.DBHandler("todo")
 todos = ''
 
 @bp.route('/')
-@auth.login_required
+@auth.login_required 
 def index():
   todos = db.get_todo_by_user_id(g.user["_id"])
   return render_template('todo/index.html', todos=todos)
