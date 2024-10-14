@@ -1,0 +1,7 @@
+.env
+.venv/
+scripts/
+.git/
+Dockerfile
+.dockerignore
+test.py

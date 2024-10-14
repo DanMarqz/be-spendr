@@ -2,31 +2,35 @@
 
 {% block header %}
   <h1>{% block title %}To do{% endblock %}</h1>
-
   {% if g.user %}
-    <a class="action" href="{{ url_for('todo.create') }}">New</a>
+    <a class="action" href="{{ url_for('todo.create') }}">New To-do</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
-  <ul>
-    {% for todo in todos %}
-      <li class="todo">
-        <div>
-          <h2>
-            {% if todo[4] == True %}
-              <strike>{{ todo[3] }}</strike>
-            {% else %}
-              {{ todo[3] }}
-            {% endif %}
-          </h2>
-          <div class='created'>{{ todo[2].strftime('%Y-%m-%d') }}</div>
-          <a class='action' href="{{ url_for('todo.update', id=todo[0]) }}">Edit</a>
-        </div>
-      </li>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-    {% endfor %}
-  </ul>
+  {% if todos %}
+    <ul>
+      {% for todo in todos %}
+        <li class="todo">
+          <div>
+            <h2>
+              {% if todo["completed"] == True %}
+                <strike>{{ todo["name"] }}</strike>
+              {% else %}
+                {{ todo["name"] }}
+              {% endif %}
+            </h2>
+            <p class='description'>{{ todo["description"] }}</p
+            <div class='created'>Created at: {{ todo["created_at"].strftime('%Y-%m-%d') }}</div>
+            <a class='action' href="{{ url_for('todo.update', id=todo["_id"]) }}">Edit</a>
+          </div>
+        </li>
+      {% if not loop.last %}
+        <hr>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No todos found.</p>
+  {% endif %}
 {% endblock %}

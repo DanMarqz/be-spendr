@@ -4,10 +4,10 @@ import utils.db as db
 import utils.variables as variables
 
 import controllers.auth as auth
+import controllers.todo as todo
 
 variables.loaded()
-db = db.DatabaseManager("test")
-print(__name__)
+db = db.DBHandler("test")
 
 def create_app():
     app = Flask(__name__)
@@ -17,6 +17,7 @@ def create_app():
     )
 
     app.register_blueprint(auth.bp)
+    app.register_blueprint(todo.bp)
 
     @app.route('/home')
     def home():
@@ -24,11 +25,13 @@ def create_app():
 
     @app.route("/test-db-connection")
     def test_db_connection():
-        return f"<p> {db.test_connection()} </p>"
+        print(db.validate_connection)
+        return f"<p> {db.validate_connection()} </p>"
 
     return app
 
 if __name__ == "__main__":
+    print(f"~~~~>_  VERSION: {variables.VERSION}")
     app = create_app() # Create the Flask app instance
     app.run(
         debug=True, 

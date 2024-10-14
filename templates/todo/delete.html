@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+    <h1>{% block title %}Update {{ todo["name"] }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        <label for="name">Name</label>
+        <input name="name" id="name" value="{{ request.form['name'] or todo['name'] }}" required />
+        <label for="description">Description</label>
+        <input name="description" id="description" value="{{ request.form['description'] or todo['description'] }}" required />
+        <label for="completed">Completed</label>
+        <input type="checkbox" name="completed" id="completed" {% if todo["completed"] == True %}checked{% endif %} />
+        <input type="submit" value="Save">
+    </form>
+
+    <form action="{{ url_for('todo.delete', id=todo['_id'] }}" method="post">
+        <input type="hidden" name="delete" value="1" />
+        <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure about delete this task?')" />
+    </form>
+{% endblock %}

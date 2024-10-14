@@ -8,47 +8,80 @@ from flask import (
   url_for
 )
 from werkzeug.exceptions import abort
+
 import utils.db as db
-import auth.login_required as login_required
+import controllers.auth as auth
 
 bp = Blueprint('todo', __name__)
+db = db.DBHandler("todo")
+todos = ''
 
 @bp.route('/')
-@login_required
+@auth.login_required 
 def index():
-  db, c = get_db()
-  c.execute(
-    'SELECT t.id, t.description, u.username, t.completed, t.created_at FROM todo t JOIN "todo-users" u on t.created_by = u.id order by created_at desc'
-  )
-  todos = c.fetchall()
-  
+  todos = db.get_todo_by_user_id(g.user["_id"])
   return render_template('todo/index.html', todos=todos)
 
 @bp.route('/create', methods=['GET', 'POST'])
-@login_required
+@auth.login_required
 def create():
   if request.method == 'POST':
+    name = request.form['name']
     description = request.form['description']
     error = None
-    
+
     if not description:
       error = 'Description required'
-    
+
     if error is not None:
       flash(error)
     else:
-      db, c = get_db()
-      c.execute(
-        'INSERT INTO "todo" (description, completed, created_by)'
-        ' values (%s, %s, %s)',
-        (description, False, g.user['id'])
-      )
-      db.commit()
-      return redirect(url_for('todo.index')) 
-      
+        db.add_todo(name, description, False, g.user["_id"])
+        return redirect(url_for('todo.index'))
+
   return render_template('todo/create.html')
 
-@bp.route('/update', methods=['GET', 'POST'])
-@login_required
-def update():
-    return ''
+@bp.route('/<id>/update', methods=['GET', 'POST'])
+@auth.login_required
+def update(id):
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        completed = True if request.form.get('completed') == 'on' else False
+        error = None
+
+        if not name:
+            error = 'Name is required.'
+        if not description:
+            error = 'Description is required.'
+
+        if error is not None:
+            flash(error)
+        else:
+            db.update_todo(id, name, description, completed, g.user["_id"])
+
+        return redirect(url_for('todo.index'))
+
+    if request.method == 'GET':
+        todo = db.get_todo_by_id(id)
+        if todo:
+            return render_template(
+                'todo/update.html',
+                todo={
+                    "name": todo["name"],
+                    "description": todo["description"],
+                    "completed": todo["completed"],
+                    "created_at": todo["created_at"],
+                    "id": id
+                }
+            )
+        else:
+            abort(404, description="Todo not found")
+
+@bp.route('/<id>/delete', methods=['GET', 'POST'])
+@auth.login_required
+def delete(id):
+    if request.method == 'POST':
+        db.delete_todo(id, g.user["_id"])
+        return redirect(url_for('todo.index'))

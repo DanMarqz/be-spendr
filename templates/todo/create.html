@@ -1,4 +1,4 @@
-{% extends 'layout.html.html' %}
+{% extends 'layout.html' %}
 
 {% block header %}
     <h1>{% block title %}New Todo{% endblock %}</h1>
@@ -6,6 +6,8 @@
 
 {% block content %}
     <form method="post">
+        <label for="name">Name</label>
+        <input name="name" id="name" required />
         <label for="description">Description</label>
         <input name="description" id="description" required />
         <input type="submit" value="Save">
