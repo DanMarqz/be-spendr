@@ -28,7 +28,7 @@ def create_app():
     # Definir algunas rutas simples
     @app.route('/status')
     def status():
-        return jsonify({"message": "Spendr is alive!"}), 200 
+        return jsonify({"message": "Server is alive!"}), 200 
 
     @app.route("/test-db-connection")
     def test_db_connection():
