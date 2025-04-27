@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 
 import services.db_handler as db_handler
-import config.variables as variables
+import utils.variables as variables
 
 import controllers.auth as auth
 import controllers.todo as todo
@@ -28,7 +28,7 @@ def create_app():
     # Definir algunas rutas simples
     @app.route('/status')
     def status():
-        return jsonify({"message": "Spendr is alive!"}), 200 
+        return jsonify({"message": "Server is alive!"}), 200 
 
     @app.route("/test-db-connection")
     def test_db_connection():

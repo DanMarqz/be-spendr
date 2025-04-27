@@ -1,17 +1,16 @@
 from flask import (
   Blueprint,
-  flash,
+  json,
+  jsonify,
   g,
-  redirect,
-  render_template,
   request,
-  url_for
 )
-from werkzeug.exceptions import abort
+from bson import json_util
 
-from flask import Blueprint, jsonify, g, request, abort, redirect, url_for
 import services.db_handler as db_handler
 import controllers.auth as auth
+import utils.message as format
+printMessage = format.PrintMessage()
 
 bp = Blueprint('todo', __name__)
 db_handler = db_handler.DBHandler("todo")
@@ -19,8 +18,9 @@ db_handler = db_handler.DBHandler("todo")
 @bp.route('/', methods=['GET'])
 @auth.login_required
 def index():
-    todos = db_handler.get_todo_by_user_id(g.user["_id"])
-    return jsonify(todos), 200
+    todos = db_handler.get_todos_by_user_id(g.user["_id"])
+    json_todos = json.loads(json_util.dumps(todos))
+    return jsonify(json_todos), 200
 
 @bp.route('/create', methods=['POST'])
 @auth.login_required
@@ -65,7 +65,8 @@ def update(id):
 def get_todo_by_id(id):
     todo = db_handler.get_todo_by_id(id)
     if todo:
-        return jsonify(todo), 200
+        json_todo = json.loads(json_util.dumps(todo))
+        return jsonify(json_todo), 200
     else:
         return jsonify({"error": "Todo not found"}), 404
 

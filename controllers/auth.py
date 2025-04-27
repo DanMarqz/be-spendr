@@ -1,8 +1,12 @@
 import functools
-from flask import Blueprint, flash, g, jsonify, request, session, redirect, url_for
+
+from flask import Blueprint, g, jsonify, request, session
 from werkzeug.security import check_password_hash, generate_password_hash  
-import config.variables as variables
-import services.db_handler as db_handler   
+
+import utils.message as format
+import services.db_handler as db_handler
+
+printMessage = format.PrintMessage()
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 db_handler = db_handler.DBHandler("users")
@@ -26,7 +30,6 @@ def register():
             else:
                 db_handler.add_user(username, generate_password_hash(password))
                 return jsonify({"message": "Registration successful. You can now log in."}), 201
-
         return jsonify({"error": error}), 400
 
 @bp.route('/login', methods=['POST'])
@@ -43,21 +46,21 @@ def login():
 
         if error is None:
             user = db_handler.get_user_credentials(username)
+
             try:
                 if user is None:
                     error = 'User not found. Please check the username.'
                 elif not check_password_hash(user["password"], password):
                     error = 'Invalid password, please try again.'
             except Exception as e:
-                print(f"{variables.ERROR_MSG} Obtaining user credentials for authentication, details: {e}")
-                return jsonify({"error": 'User not registered, please register.'}), 400
+                return jsonify({"error": 'User not registered, please register.'}), 404
 
         if error is None:
             session.clear()
             session['user_id'] = str(user['_id'])
             return jsonify({"message": "Login successful."}), 200
 
-        return jsonify({"error": error}), 400
+        return jsonify({"error": error}), 401
 
 @bp.before_app_request
 def load_logged_in_user():
@@ -75,7 +78,6 @@ def login_required(view):
             return jsonify({"error": "Authentication required."}), 401
 
         return view(**kwargs)
-
     return wrapped_view
 
 @bp.route('/logout', methods=['POST'])
