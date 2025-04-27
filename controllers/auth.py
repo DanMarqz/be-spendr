@@ -3,8 +3,7 @@ import functools
 from flask import Blueprint, g, jsonify, request, session
 from werkzeug.security import check_password_hash, generate_password_hash  
 
-import config.variables as variables
-import config.message as format
+import utils.message as format
 import services.db_handler as db_handler
 
 printMessage = format.PrintMessage()

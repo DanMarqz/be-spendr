@@ -9,7 +9,7 @@ from bson import json_util
 
 import services.db_handler as db_handler
 import controllers.auth as auth
-import config.message as format
+import utils.message as format
 printMessage = format.PrintMessage()
 
 bp = Blueprint('todo', __name__)
@@ -65,7 +65,8 @@ def update(id):
 def get_todo_by_id(id):
     todo = db_handler.get_todo_by_id(id)
     if todo:
-        return jsonify(todo), 200
+        json_todo = json.loads(json_util.dumps(todo))
+        return jsonify(json_todo), 200
     else:
         return jsonify({"error": "Todo not found"}), 404
 

@@ -1,6 +1,6 @@
 import datetime, json
-import config.variables as variables  # Importamos variables de configuración (como la URI y el nombre de la base de datos)
-import config.message as format
+import utils.variables as variables  # Importamos variables de configuración (como la URI y el nombre de la base de datos)
+import utils.message as format
 
 from pymongo.mongo_client import MongoClient  # Para crear un cliente de MongoDB y conectarnos a la base de datos
 from pymongo.server_api import ServerApi  # Para especificar la versión de la API del servidor MongoDB

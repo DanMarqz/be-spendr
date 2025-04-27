@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 
 import services.db_handler as db_handler
-import config.variables as variables
+import utils.variables as variables
 
 import controllers.auth as auth
 import controllers.todo as todo
